@@ -1,0 +1,68 @@
+REFER "https://medium.com/@ridwaneelfilali/c-network-programming-5d89bd32cbb2"
+
+TYPE : "man socket" in terminal and read the docs
+'''
+Name:         Purpose                                    Man page
+AF_UNIX:      Local communication                        unix(7)
+AF_LOCAL:     Synonym for AF_UNIX
+AF_INET:      IPv4 Internet protocols                    ip(7)
+
+
+SOCK_STREAM:     Provides sequenced, reliable, two-way, connection-based
+                byte  streams.  An out-of-band data transmission mechanism may be supported.
+'''
+
+perror() ==> Prints a textual description of the error code currently stored in the system variable "errno" to "stderr".
+
+in any manual page : 
+at the below-most : type : "/patter-name" ==> ex: "/sock" ==> to search for sock keyword  ("" , is used just for highlighting )
+
+for this tcp-ip structure 
+we can also refer : "https://www.keypuncher.net/blog/network-sockets-in-c"
+
+for socakaddr_in or sockaddr_on --STRUCTURE (DOCS NOT AVAILABLE IN LINUX) ==> REFER == "https://pubs.opengroup.org/onlinepubs/009695399/basedefs/netinet/in.h.html"
+
+TERMINAL > "man bind" ==> sockaddr IS ALSO FOUND HERE 
+int bind(int sockfd, const struct sockaddr *addr,
+                socklen_t addrlen);
+TERMINAL > "man listen" ==> int listen(int sockfd, int backlog);
+
+FOR-COPY-PASTE LARGER SET OF DATA : 
+REFER : "https://www.malibal.com/guides/how-to-copy-file-content-to-clipboard-on-linux/"
+       
+read the docs for the below code : 
+man accept :
+
+man connect :
+int connect(int sockfd, const struct sockaddr *addr,
+                   socklen_t addrlen);
+                   
+man inet_addr : "inet-protocol" 
+Internet networking (IN)
+
+why htons() ? ==> man htons
+uint16_t htons(uint16_t hostshort);
+The htons() function converts the unsigned short integer hostshort from
+       host byte order to network byte order.
+
+what is host-byte in simple words : 
+Host Byte Order refers to how bytes are arranged when referring to the computer architecture of a host computing platform. Due to pervasiveness of the Intel architecture, this is generally Little Endian This means least significant byte in the smallest address in a word.
+
+FOR PREFECT-EXPLANATION 
+refer : "https://devopedia.org/images/article/171/7568.1556387435.png"
+
+man memset :
+void *memset(void *s, int c, size_t n);
+
+man recv : (recieve)
+ssize_t recv(int sockfd, void *buf, size_t len, int flags);
+
+to implement 2 way communication , we need a "pthread library" during "compile time " :
+
+refer : "https://stackoverflow.com/questions/1662909/undefined-reference-to-pthread-create-in-linux"
+
+harsh@harsh-P6-2010IX:~/Desktop/SocketNetworkingWithAPI$ g++ -pthread server.cpp -o server
+harsh@harsh-P6-2010IX:~/Desktop/SocketNetworkingWithAPI$ ./server 
+
+harsh@harsh-P6-2010IX:~/Desktop/SocketNetworkingWithAPI$ g++ -pthread client.cpp -o client
+harsh@harsh-P6-2010IX:~/Desktop/SocketNetworkingWithAPI$ ./client

@@ -1,0 +1,336 @@
+OTHER OPTIONS : "https://ubuntuforums.org/showthread.php?t=1396491"
+''' HOW TO CHANGE MAC-ADDRESS IN C WITH CODE 
+https://www.linuxquestions.org/questions/programming-9/how-to-change-mac-addres-via-c-code-801613/
+'''
+
+''' refer : "https://www.geeksforgeeks.org/difference-between-int-p3-and-int-p3/?ref=asr3" 
+"https://www.geeksforgeeks.org/difference-between-int-and-size_t-in-cpp/?ref=ml_lbp"
+"https://www.geeksforgeeks.org/difference-between-struct-and-typedef-struct-in-cpp/?ref=ml_lbp"
+"https://www.geeksforgeeks.org/data-type-of-a-pointer-in-c/?ref=ml_lbp"
+'''
+
+// THIS PROJECT IS FOR CONSTANTLY CHANGING MAC-ADDRESS IN REAL-TIME SWITCHES 
+what is #define _GNU_SOURCE ? 
+refer ==> "https://stackoverflow.com/questions/5582211/what-does-define-gnu-source-imply"
+
+Defining _GNU_SOURCE has nothing to do with license and everything to do with writing (non-)portable code. If you define _GNU_SOURCE, you will get:
+
+    access to lots of nonstandard GNU/Linux extension functions
+    access to traditional functions which were omitted from the POSIX standard (often for good reason, such as being replaced with better alternatives, or being tied to particular legacy implementations)
+    access to low-level functions that cannot be portable, but that you sometimes need for implementing system utilities like mount, ifconfig, etc.
+    broken behavior for lots of POSIX-specified functions, where the GNU folks disagreed with the standards committee on how the functions should behave and decided to do their own thing.
+
+As long as you're aware of these things, it should not be a problem to define _GNU_SOURCE, but you should avoid defining it and instead define _POSIX_C_SOURCE=200809L or _XOPEN_SOURCE=700 when possible to ensure that your programs are portable.
+
+In particular, the things from _GNU_SOURCE that you should never use are #2 and #4 above.
+
+
+why unsigned vs signed (unsigned is better ) : 
+&& why "typedef unsigned char int8; " ????
+
+Breakdown of the Statement
+
+    typedef: This keyword is used to create an alias for an existing data type. It allows programmers to define a new name for a type, making the code more readable and easier to manage.
+
+    unsigned char: This is a built-in data type in C. The char type typically represents a single byte (8 bits) of data, which can hold values from -128 to 127 if signed, or from 0 to 255 if unsigned. By using unsigned, we specify that the variable can only hold non-negative values, effectively doubling the upper limit of the range.
+
+    int8: This is the new name we are creating for the unsigned char type. The int8 suggests that it is an integer type with 8 bits (1 byte). However, it is important to note that int8 does not represent an integer in the traditional sense (like int), but rather an unsigned character type that can be used to represent small non-negative integers.
+
+Why Use unsigned char?
+
+Using unsigned char is particularly useful in scenarios where you need to store small non-negative values, such as:
+
+    Binary Data: When dealing with raw binary data, such as image pixels or network packets, where values range from 0 to 255.
+    Memory Efficiency: It allows for more efficient memory usage when you know that the values will not be negative, as it provides a larger positive range compared to a signed char.
+
+Signed vs. Unsigned
+
+    Signed Types: These types can represent both negative and positive values. For example, a signed char can hold values from -128 to 127.
+    Unsigned Types: These types can only represent non-negative values, effectively doubling the maximum positive value. An unsigned char can hold values from 0 to 255.
+
+CODE : 
+#include <stdio.h>
+
+typedef unsigned char int8;
+
+int main() {
+    int8 value1 = 200; // Valid, as it is within the range of 0 to 255
+    int8 value2 = 300; // Invalid, will cause an overflow
+
+    printf("Value 1: %d\n", value1);
+    
+    // Uncommenting the next line will lead to an error or unexpected behavior
+    // printf("Value 2: %d\n", value2); 
+
+    return 0;
+}
+
+
+why short-int : 
+2 bytes
+Short int in C occupies 2 bytes of memory. Number Range of short int is −32,767 to +32,767.
+
+man random ==> to get the details 
+always check /RETURN VALUE FOR EACH OF THE MANUAL PAGE 
+
+i want to perform division in multiple addresses 
+harsh@harsh-P6-2010IX:~/Desktop/myownMacAddressInNetowrking$ expr 48 / 8 = 6 
+
+harsh@harsh-P6-2010IX:~/Desktop/myownMacAddressInNetowrking$ 
+echo $((2 ** 48))
+==> to get the power of 48 ==> 281474976710656
+echo ==> to display o/p on screen 
+
+why that $ sign above ?? 
+Breakdown of the Command
+
+    echo Command:
+        The echo command is used to display a line of text or a variable value to the standard output (usually the terminal). In this case, it will output the result of the arithmetic operation.
+
+    Arithmetic Expansion:
+        The (( ... )) syntax is used for arithmetic expansion in Bash. It allows you to perform arithmetic operations without needing to use external tools like expr or bc. Inside the double parentheses, you can use standard arithmetic operators such as +, -, *, and /.
+
+    The Dollar Sign ($):
+        The dollar sign preceding the arithmetic expansion ((2 * 48)) indicates that the result of the expression should be evaluated and then passed to the echo command. In this case, it tells Bash to compute the value of 2 * 48 before executing the echo command.
+
+
+how to make changes to a existing file in vim : 
+It's relatively simple:
+
+    Open a new or existing file with vim filename .
+    Type i to switch into insert mode so that you can start editing the file.
+    Enter or modify the text with your file.
+    Once you're done, press the escape key Esc to get out of insert mode and back to command mode.
+    Type :wq to save and exit your file.
+    
+UNDERSTANDING THE MAKEFILE : 
+
+$^ ==> MEANS STARTS WITH (SYMBOL IS ^)
+$@ ==> MEANS ENDS WITH (@ ENDS WITH SYMBOL)
+altermac *.o ==> * MEANS ALL ==> DELETE ALL WASTE FILES      
+
+
+DEEPER UNDERSTANDING OF MAKE-FILE : 
+Makefile : 
+
+opt=-O3 -w -Wall -std=c2x
+
+all: clean altermac
+
+altermac: altermac.o 
+	cc ${opt} $^ -o $@
+
+altermac.o: altermac.c
+	cc ${opt} -c $^
+
+clean:
+	rm -f altermac *.o
+
+
+'''
+    opt= -O3 -Wall -std=c2x:
+        This line defines a variable named opt that holds compiler options.
+        -O3: This option specifies the level of optimization(O). -O3 is a high level of optimization that enables various optimizations to improve performance. It can make the compiled program run faster but may increase compilation time.
+        -w : for the suppression of warnings wrt variables , processes
+        -Wall: This flag enables all compiler's warning messages. It is crucial for identifying potential issues in the code, helping developers write cleaner and more reliable code.
+        -std=c2x: This option specifies the standard of the C language to be used. c2x refers to the upcoming C standard, which includes features from C11 and proposed features for future versions. It ensures that the code adheres to the specified standard.
+
+   
+    all: clean altermac:
+        This line defines a target named all, which depends on two other targets: clean and altermac. When you run make all, it will first execute the clean target and then the altermac target.
+
+   
+    altermac: altermac.o:
+        This line defines a target named altermac, which depends on the object file altermac.o. The altermac target will be built if altermac.o is up to date.
+
+   
+    cc ${opt} $^ -o $@:
+        This command compiles the altermac target.
+        cc: This is the C compiler command.
+        ${opt}: This expands to the options defined earlier (-O3 -Wall -std=c2x).
+        $^: This is a special variable that represents all the prerequisites of the target, in this case, altermac.o.
+        -o $@: The $@ variable represents the name of the target being generated, which is altermac. This command tells the compiler to output the executable with the name altermac.
+
+
+    altermac.o: altermac.c:
+        This line defines a target for the object file altermac.o, which depends on the source file altermac.c.
+
+    cc ${opt} -c $^:
+        This command compiles the source file into an object file.
+        -c: This flag tells the compiler to compile the source file into an object file without linking.
+
+    clean::
+        This target is used to clean up the build environment by removing generated files.
+
+    rm -f altermac *.o:
+        This command removes the executable altermac and all object files (*.o). The -f option forces the removal without prompting for confirmation.
+
+Clarifications on Symbols and Variables
+
+    {} Braces: In the context of Makefiles, braces are used to denote variables. For example, ${opt} refers to the variable opt defined earlier.
+
+    $ Symbol: The dollar sign is used to reference variables in Makefiles. For instance, $^ and $@ are special variables that represent prerequisites and targets, respectively.
+
+    ^ Symbol: The caret symbol (^) in $^ indicates all prerequisites of the target. It does not mean "starts with" in this context.
+
+    @ Symbol: The at symbol (@) in $@ represents the target name. It does not mean "ends with" but rather refers to the name of the target being built.
+
+    * Wildcard: The asterisk (*) is a wildcard that matches any number of characters. In the command rm -f altermac *.o, it means to delete all object files in the current directory.
+
+
+Example Usage : 
+To illustrate how this Makefile works, consider the following scenario:
+
+    You have a source file named altermac.c.
+    You run the command make all in the terminal.
+    The clean target is executed first, removing any previous builds.
+    The altermac.o object file is compiled from altermac.c.
+    Finally, the altermac executable is created using the compiled object file.
+
+This process ensures that your project is built efficiently and correctly, adhering to the specified compiler options.
+
+In conclusion, understanding a Makefile is essential for managing C projects effectively. The options and commands used in the Makefile play a crucial role in the compilation process, ensuring that your code is optimized, warnings are addressed, and the correct standards are followed.
+
+%llx ==> long long string format specifier for printing character
+man 3 printf
+
+'''
+WHEN WE RUN MAKE : 
+harsh@harsh-P6-2010IX:~/Desktop/myownMacAddressInNetowrking$ make
+rm -f altermac *.o
+cc -O3 -w -Wall -std=c2x -c altermac.c
+cc -O3 -w -Wall -std=c2x altermac.o -o altermac
+harsh@harsh-P6-2010IX:~/Desktop/myownMacAddressInNetowrking$ ./altermac
+0x302cf45c0df0 
+harsh@harsh-P6-2010IX:~/Desktop/myownMacAddressInNetowrking$ 
+
+FOMRAT OF MAC ADDRESS : 0X INDICATES AHEXADECIMAL FORMAT 
+CISCO : 0x 302c.f45c.0df0
+WINDOWS : 0x 30:2c:f45c:0d:f0
+'''
+
+''' how to trace ip-address systemcalls(strace) , library-tracing(ltrace) 
+
+harsh@harsh-P6-2010IX:~$ strace /sbin/ifconfig
+harsh@harsh-P6-2010IX:~$ ltrace /sbin/ifconfig
+
+REFER : "https://www.networkworld.com/article/971012/using-strace-and-ltrace-to-help-with-troubleshooting-on-linux.html"
+Both strace and ltrace are powerful command-line tools for debugging and troubleshooting programs on Linux: Strace captures and records all system calls made by a process as well as the signals received, while ltrace does the same for library calls.
+'''
+
+HERE WE ARE TRYINF TO CHANGE THE ADDRESS OF A HARDWARE OF A COMPUTER : 
+harsh@harsh-P6-2010IX:~$ sudo bash ==> enter the bash shell 
+chnage : "ether 2c:41:38:b7:4b:be"
+==> "
+root@harsh-P6-2010IX:/home/harsh# ifconfig ens192 hw addr 2c:41:38:b7:4b:ee
+==> ens 192 is local ip-address , 
+
+"
+check ifr_name
+'''
+root@harsh-P6-2010IX:/usr/include# find . -name ioctl.h -print | xargs cat | grep ifr_name
+root@harsh-P6-2010IX:/usr/include#  grep -r ifr_name
+linux/if.h: * definitions which begin with ifr_name.  The
+linux/if.h:#define ifr_name	ifr_ifrn.ifrn_name	/* interface name 	*/
+net/if.h:   ioctl's must have parameter definitions which begin with ifr_name.
+net/if.h:# define ifr_name	ifr_ifrn.ifrn_name	/* interface name 	*/
+'''
+
+'''
+how to just read with vim : 
+vi net/if.h
+
+<pre>root@harsh-P6-2010IX:/usr/include# find . -name ioctl.h -print 
+./linux/ioctl.h
+./linux/hdlc/ioctl.h
+./linux/mmc/ioctl.h
+./x86_64-linux-gnu/asm/ioctl.h
+./x86_64-linux-gnu/sys/ioctl.h
+./asm-generic/ioctl.h</pre>
+
+check both and extra the files 
+root@harsh-P6-2010IX:/usr/include# vi ./x86_64-linux-gnu/sys/ioctl.h
+root@harsh-P6-2010IX:/usr/include# vi ./x86_64-linux-gnu/asm/ioctl.h
+root@harsh-P6-2010IX:/usr/include# vi ./asm-generic/ioctl.h
+
+search occurences of page : 
+type : and q to exit the vim page
+''' 
+
+'''
+.lesshst. Name of the history file used to remember search commands and shell commands between invocations of less. If set to "-", a history file is not used. The default is "$HOME/. lesshst" on Unix systems, "$HOME/_lesshst" on DOS and Windows systems, or "$HOME/lesshst.
+
+'''
+where is net command for structure reference : 
+root@harsh-P6-2010IX:~# whereis net
+net: /usr/include/net /usr/src/linux-hwe-5.15-headers-5.15.0-119/net /usr/src/linux-hwe-5.11-headers-5.11.0-27/net /usr/src/linux-hwe-5.11-headers-5.11.0-37/net /usr/src/linux-headers-5.11.0-27-generic/net /usr/src/linux-headers-5.11.0-37-generic/net /usr/src/linux-headers-5.15.0-119-generic/net
+
+in the same file we want ifreq 
+we want if-request :
+struct ifreq
+  {
+# define IFHWADDRLEN	6
+# define IFNAMSIZ	IF_NAMESIZE
+    union
+      {
+	char ifrn_name[IFNAMSIZ];	/* Interface name, e.g. "en0".  */
+      } ifr_ifrn;
+
+    union
+      {
+	struct sockaddr ifru_addr;
+	struct sockaddr ifru_dstaddr;
+	struct sockaddr ifru_broadaddr;
+	struct sockaddr ifru_netmask;
+	struct sockaddr ifru_hwaddr;
+	short int ifru_flags;
+	int ifru_ivalue;
+	int ifru_mtu;
+	struct ifmap ifru_map;
+	char ifru_slave[IFNAMSIZ];	/* Just fits the size */
+	char ifru_newname[IFNAMSIZ];
+	__caddr_t ifru_data;
+      } ifr_ifru;
+  };
+'''
+'''
+" refer : for struct sockaddr 
+'''
+REFER : https://man7.org/linux/man-pages/man3/sockaddr.3type.html  or man 7 socket
+'''
+"
+
+''' HOW TO CHANGE MAC-ADDRESS IN C WITH CODE 
+https://www.linuxquestions.org/questions/programming-9/how-to-change-mac-addres-via-c-code-801613/
+
+'' CHECK ERRORS
+root@harsh-P6-2010IX:/# ioctl(4, SIOCSIFHWADDR, {ifr_name="ens192", ifr_hwaddr={sa_family=ARPHRD_EHTER, sa_data=2c:41:38:b7:4b:be}}) = 0
+bash: syntax error near unexpected token `4,'
+
+''
+'''
+
+" while researching found data 
+__attribute__((constructor[(priority)])) function attribute This attribute causes the function it is associated with to be called automatically before main() is entered.
+"
+search : APRHRD_ETHER
+root@harsh-P6-2010IX:~# grep -r APRHRD_ETHER /usr/include
+
+/usr/include/linux/llc.h
+__kernel_sa_family_t sllc_arphrd; /* ARPHRD_ETHER */
+
+#define ARPOP_REQUEST-1 
+
+/usr/include/net/if_arp.h 
+/* ARP protocol HARDWARE identifiers. */
+#define ARPHRD_NETROM	0		/* From KA9Q: NET/ROM pseudo. */
+#define ARPHRD_ETHER 	1		/* Ethernet 10/100Mbps.  */
+
+'''FINAL OUTPUT MAN ::
+harsh@harsh-P6-2010IX:~/Desktop/myownMacAddressInNetowrking$ make
+rm -f altermac *.o
+cc -O3 -w -Wall -std=c2x -c altermac.c
+cc -O3 -w -Wall -std=c2x altermac.o -o altermac
+harsh@harsh-P6-2010IX:~/Desktop/myownMacAddressInNetowrking$ ./altermac ens192
+0x8329c7516f1c 
+'''

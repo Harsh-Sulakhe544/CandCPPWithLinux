@@ -1,0 +1,2071 @@
+'''for kernel docs refer : 
+https://www.kernel.org/doc/man-pages/
+'''
+
+FOR SIGNED VS UNSIGNED INT : REFER : "https://www.geeksforgeeks.org/difference-between-unsigned-int-and-signed-int-in-c/"
+
+WHY uintw_t ==> "
+"intN_t or uintN_t", Where N is width of integer which can be 8, 16, 32, 64
+or any other type width supported by the library.
+"https://www.geeksforgeeks.org/extended-integral-types-choosing-correct-integer-size-cc/"
+"
+this is a big project : 
+THEORIES : 
+"https://build-your-own.org/redis"
+"https://build-your-own.org/redis/01_intro_redis"
+https://build-your-own.org/redis/02_intro_sockets
+
+HOW TOP CIDE EFFICIENTLY IN C , BY A AUTHOR: 
+"https://beej.us/guide/bgc/html/"
+
+
+Client-Server Model:
+For many use cases, such as Redis, the one initiating the channel is called a “client”, and the “server” is the one waiting for new clients.
+A non-toy server can serve multiple clients simultaneously, which is what we will focus on.
+
+Request-Response Model:
+Many client-server applications are also request-response:
+    The client sends 1 request and waits for 1 response.
+    The server processes and sends the response for each request in a loop.
+Examples of request-response: DNS, HTTP/1.1, and Redis.
+
+WHY REDIS : 
+TCP, UDP and Applications
+
+There are 2 types of channels: packet-based and byte-stream-based. Each offers a different set of capabilities to applications.
+
+UDP is packet-based. A packet is a message of a certain size from the application’s PoV. But Redis is TCP-based, so we’ll ignore UDP.
+
+TCP provides a continuous stream of bytes. Unlike messages, a byte stream has no boundaries within it, which is a major difficulty in understanding TCP! That’s why it’s important to code your own Redis.
+
+2.2 TCP/IP Quick Review
+Layers of Protocols
+
+Network protocols are divided into different layers, where the higher layer depends on the lower layer, and each layer provides different capabilities.
+
+ top
+  /\    | App |     message or whatever
+  ||    | TCP |     byte stream
+  ||    | IP  |     packets
+  ||    | ... |
+bottom
+
+WHAT IS EXACTLY FILE-HANDLERS ? 
+Applications Refer to Sockets by Opaque OS Handles
+
+In the same way that Twitter handles are used to refer to Twitter users.
+
+On Linux, a handle is called a file descriptor (fd), which is an integer that is unique to the process. The name “file descriptor” is just a name; it has nothing to do with files, nor does it describe anything.
+
+START READING THE DOCS IN SECTORS : 
+harsh@harsh-P6-2010IX:~/Desktop/ownRedisUsingCpp$ man socket.2
+
+man socket.2
+
+The above command shows the man page for the socket() syscall. Man pages are divided into several sections, as specified by the numerical suffix. Examples:
+
+    man read.2 returns the read() syscall (section 2 is for syscalls).
+    man read returns the read shell command (in section 1; not what you want).
+    man socket.7 returns the socket interface overview, not the syscall.
+
+harsh@harsh-P6-2010IX:~/Desktop/ownRedisUsingCpp$ man setsockopt 
+WE SEE SOMETHING IN MANUAL PAGE FOR "man setsockopt" : Netfilter 
+Netfilter is a packet filter and firewall implemented in the standard Linux kernel. The user space iptables tool is used for configuration. It supports packet filtering (stateless or stateful), many kinds of network address and port translation (NAT/NAPT), and multiple API layers for third-party extensions.
+
+using tcp-client-server model : 
+man abort() ==> for signal handling wrt "SIGABRT" signal-abort 
+
+STANDARD-ERRORS : 
+harsh@harsh-P6-2010IX:~/Desktop/ownRedisUsingCpp$ man stderr
+
+
+check write and read docs : 
+harsh@harsh-P6-2010IX:~/Desktop/ownRedisUsingCpp$ man read 
+harsh@harsh-P6-2010IX:~/Desktop/ownRedisUsingCpp$ man write 
+NAME
+     write — send a message to another user
+
+SYNOPSIS
+     write user [tty]
+
+DESCRIPTION
+     The write utility allows you to communicate with other users, by copying
+     lines from your terminal to theirs.
+
+     When you run the write command, the user you are writing to gets a mes‐
+     sage of the form:
+
+           Message from yourname@yourhost on yourtty at hh:mm ...
+
+'''
+IN SERVER.CPP , WHAT ARE THESE BELOW ARGUEMENTS : 
+setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val));
+
+REFER : " https://stackoverflow.com/questions/21515946/what-is-sol-socket-used-for && 
+https://pubs.opengroup.org/onlinepubs/7908799/xns/getsockopt.html"
+'''
+
+part - 4: Protocol Parsing
++-----+------+-----+------+--------
+| len | msg1 | len | msg2 | more...
++-----+------+-----+------+--------
+
+harsh@harsh-P6-2010IX:~/Desktop/ownRedisUsingCpp$ man memcpy
+memcpy - copy memory area
+void *memcpy(void *dest, const void *src, size_t n);
+
+
+'''
+    4 bytes for some additional data (possibly headers or control information),
+    4096 bytes for the maximum message size,
+    1 byte for the null terminator, which is essential for C-style strings to indicate the end of the string.
+    
+    total     4101 bytes,
+'''
+
+
+'''
+WE HAVE CHANGED THE MAKE FILE NOW : 
+
+# Makefile for compiling both server and client applications
+
+# Compiler and flags
+CXX = g++
+CXXFLAGS = -w -Wall -Wextra -O2 -g
+
+# Targets
+all: server client
+
+server: server.cpp
+	$(CXX) $(CXXFLAGS) server.cpp -o server
+
+client: client.cpp
+	$(CXX) $(CXXFLAGS) client.cpp -o client
+
+# Clean up build files
+clean:
+	rm -f server client
+
+make: Nothing to be done for 'all'. means: 
+It just means that it doesn't have to compile the code because there weren't any changes since the last build (like it'll compile normally if you add and then delete a random letter inside of a comment). The code should have already built and transferred to the brain.
+'''
+
+WHAT IS somaxconn IN listen()  : 
+somaxconn parameter defines the maximum number of connections that can be queued for acceptance by a listen socket. By default, this value may be set too low for high-traffic Kubernetes clusters, leading to potential connection drops or delays during peak times. To view the current value: sysctl net.
+
+
+The  ntohs() function converts the unsigned short integer netshort from
+       network byte order to host byte order.
+       
+       man assert : 
+#include <assert.h>
+       void assert(scalar expression);
+
+read - read from a file descriptor       
+
+
+PART - 5 
+'''
+we use EVENT-LOOPS INSTEAD OF NORMAL : 
+There are 3 ways to deal with concurrent connections in server-side network programming. They are: forking, multi-threading, and event loops. Forking creates new processes for each client connection to achieve concurrency. Multi-threading uses threads instead of processes. An event loop uses polling and nonblocking IO and usually runs on a single thread. Due to the overhead of processes and threads, most modern production-grade software uses event loops for networking.
+
+harsh@harsh-P6-2010IX:~/Desktop/ownRedisUsingCpp$ man poll : 
+
+NAME
+       poll, ppoll - wait for some event on a file descriptor
+
+SYNOPSIS
+       #include <poll.h>
+
+       int poll(struct pollfd *fds, nfds_t nfds, int timeout);
+
+       #define _GNU_SOURCE         /* See feature_test_macros(7) */
+       #include <signal.h>
+       #include <poll.h>
+
+'''
+
+'''
+harsh@harsh-P6-2010IX:~/Desktop/ownRedisUsingCpp$ man fcntl : 
+NAME
+       fcntl - manipulate file descriptor
+
+SYNOPSIS
+       #include <unistd.h>
+       #include <fcntl.h>
+
+       int fcntl(int fd, int cmd, ... /* arg */ );
+'''
+
+By default, read() waits until at least one byte is available to return to the application; this default is called “blocking” mode. Alternatively, individual file descriptors can be switched to “non-blocking” mode, which means that a read() on a slow file will return immediately, even if no bytes are available.
+
+void)fcntl(fd, F_SETFL, flags); // f-set-flag : F_SETFL
+F_SETFL (int)
+              Set the file status flags to the value specified by  arg.   File
+              access mode (O_RDONLY, O_WRONLY, O_RDWR) and file creation flags
+              (i.e., O_CREAT, O_EXCL, O_NOCTTY, O_TRUNC) in arg  are  ignored.
+              On  Linux,  this  command can change only the O_APPEND, O_ASYNC,
+              O_DIRECT, O_NOATIME, and O_NONBLOCK flags.  It is  not  possible
+              to change the O_DSYNC and O_SYNC flags; see BUGS, below.
+'''
+
+for enums check : "https://en.cppreference.com/w/cpp/language/enum"
+
+'''
+what is nfds in below code :  refer "https://linux.die.net/man/2/poll"
+int poll(struct pollfd *fds, nfds_t nfds, int timeout);
+
+    struct pollfd *fds: This parameter is a pointer to an array of pollfd structures. Each pollfd structure contains information about a file descriptor that you want to monitor, including the file descriptor itself, the events you are interested in, and the events that occurred.
+
+    nfds_t nfds: This is the parameter in question. The nfds parameter specifies the number of file descriptors in the fds array that you want to monitor. The type nfds_t is an unsigned integer type, which is defined in the <poll.h> header file. The long form of nfds is "number of file descriptors."
+
+    int timeout: This parameter specifies the maximum time (in milliseconds) that the function will block waiting for an event. A value of -1 means to block indefinitely, while a value of 0 means to return immediately.
+'''
+
+WE ARE AT : REFER : 
+man  errno : 
+EINTR : 4 Interrupted system call
+EAGAIN : Resource temporarily unavailable (may be the same value
+                       as EWOULDBLOCK) (POSIX.1-2001).
+
+function details : 
+The try_fill_buffer() function fills the read buffer with data. Since the size of the read buffer is limited, the read buffer could be full before we hit EAGAIN, so we need to process data immediately after reading to clear some read buffer space, then the try_fill_buffer() is looped until we hit EAGAIN.
+
+6.4 Parsing the Protocol :
+The try_one_request function handles the incoming data, but why is this in a loop? Is there more than one request in the read buffer? The answer is yes. For a request/response protocol, clients are not limited to sending one request and waiting for the response at a time, clients can save some latency by sending multiple requests without waiting for responses in between, this mode of operation is called “pipelining”. Thus we can’t assume that the read buffer contains at most one request.
+
+
+man memmove : void *memmove(void *dest, const void *src, size_t n);
+
+07. Basic Server: get, set, del : 
+With the event loop code from the last chapter, we can finally start adding commands to our server.
+7.1 The Protocol : 
+The “command” in our design is a list of strings, like set key val. We’ll encode the “command” with the following scheme.
+
++------+-----+------+-----+------+-----+-----+------+
+| nstr | len | str1 | len | str2 | ... | len | strn |
++------+-----+------+-----+------+-----+-----+------+
+
+The nstr is the number of strings and the len is the length of the following string. Both are 32-bit integers.
+The response is a 32-bit status code followed by the response string.
+
++-----+---------+
+| res | data... |
+
+to check the command 
+int strcasecmp(const char *s1, const char *s2);
+
+harsh@harsh-P6-2010IX:~/Desktop/ownRedisUsingCpp$ make
+ IN SAME LOCATION  ==>  ./server 
+$ ./client get k
+server says: [2]
+$ ./client set k v
+server says: [0]
+$ ./client get k
+server says: [0] v
+$ ./client del k
+server says: [0]
+$ ./client get k
+server says: [2]
+$ ./client aaa bbb
+server says: [1] Unknown cmd
+
+resize() ==> "https://www.geeksforgeeks.org/vector-resize-c-stl/"
+
+'''
+SERIOUS POINTER STUFF WITH MACROS IN C LANGUAGE :
+#define container_of(ptr, T, member) ({                  \
+    const typeof( ((T *)0)->member ) *__mptr = (ptr);    \
+    (T *)( (char *)__mptr - offsetof(T, member) );})
+
+Breakdown of Each Component
+
+    Macro Definition:
+        #define container_of(ptr, T, member) defines a macro named container_of that takes three parameters: ptr, T, and member.
+        ptr: This is a pointer to a member of a structure.
+        T: This is the type of the structure that contains the member.
+        member: This is the name of the member within the structure.
+
+    Compound Statement:
+        The macro uses a compound statement enclosed in ({ ... }), which allows for multiple statements to be executed as a single expression. This is a GCC extension.
+
+    typeof:
+        typeof( ((T *)0)->member ) is a GCC-specific extension that retrieves the type of the member specified.
+        ((T *)0) casts a null pointer to type T, allowing access to the member without needing an actual instance of T. This is a common technique to determine the type of a member.  (0 MEANS "NULL POINTER")
+
+    Pointer Declaration:
+        const typeof( ((T *)0)->member ) *__mptr = (ptr); declares a constant pointer __mptr of the type of the member, initialized with the provided ptr.
+        This means __mptr now points to the member of the structure.
+
+    Calculating the Parent Structure Address:
+        (T *)( (char *)__mptr - offsetof(T, member) ); is the core of the macro.
+        Here, offsetof(T, member) computes the offset of the member within the structure T. This is done using the offsetof macro, which is defined in <cstddef>.
+        (char *)__mptr casts the pointer to a char*, allowing pointer arithmetic to be performed in bytes.
+        By subtracting the offset from __mptr, we effectively move back to the start of the structure T, thus retrieving the address of the parent structure.
+
+''' 
+
+
+""
+WE USE CHAINING IN HASH-TABLE - EASY TO UNDERSTAND , AND DIFFICULT TO MESS WITH UP :  REFER : 
+'https://www.geeksforgeeks.org/separate-chaining-collision-handling-technique-in-hashing/'
+
+STRUCTURE : hastable.h 
+
+struct HTab {
+    HNode **tab = NULL; // array of `HNode *`
+    size_t mask = 0;    // 2^n - 1
+    size_t size = 0;
+};
+
+DIAGRAM : 
+HTab Structure
++---------------------+
+|      HTab           |
++---------------------+
+| tab (HNode **)      | --> +-----------------+   +-----------------+
+| mask (size_t)      |     | HNode *         |   | HNode *         |
+| size (size_t)      |     | (Bucket 0)     |   | (Bucket 1)     |
++---------------------+     +-----------------+   +-----------------+
+                           |  HNode *         |   | HNode *         |
+                           | (Next Node)     |   | (Next Node)     |
+                           +-----------------+   +-----------------+
+
+DETAILED AND CLEAR VISION :
+HTab Structure:
++---------------------+
+|      HTab          |
++---------------------+
+| tab (HNode **)      | --> [ HNode1 -> HNode2, NULL, NULL, NULL ]
+| mask (size_t)      |  --> 3
+| size (size_t)      |  --> 2
++---------------------+
+""
+
+BETTER UNDERSTANDING OF SEARCHING IN A LINKED-LIST : 
+"
+static HNode **h_lookup(HTab *htab, HNode *key, bool (*eq)(HNode *, HNode *)) {
+    if (!htab->tab) {
+        return NULL;
+    }
+
+    size_t pos = key->hcode & htab->mask;
+    HNode **from = &htab->tab[pos];     // incoming pointer to the result
+    for (HNode *cur; (cur = *from) != NULL; from = &cur->next) {
+        if (cur->hcode == key->hcode && eq(cur, key)) {
+            return from;
+        }
+    }
+    return NULL;
+}
+
+=====> from pointer 
+Hash Table (htab->tab)
++-------------------+
+| Index 0          | --> NULL
+| Index 1          | --> HNode1 --> HNode2 --> HNode3 --> NULL
+| Index 2          | --> NULL
+| Index 3          | --> NULL
++-------------------+
+
+Assuming key->hcode & htab->mask = 1
+
+    In this example, the linked list at index 1 contains three nodes: HNode1, HNode2, and HNode3.
+    Initially, from points to the address of htab->tab[1], which is the head of the linked list (HNode1).
+    As the loop iterates, from will be updated to point to the next nodes in the list until a match is found or the end of the list is reached.
+
+=====> curr pointer 
+Hash Table (HTab)
++-------------------+
+| Index 0           | --> HNode1 (hcode: 10) --> HNode2 (hcode: 20) --> NULL
+| Index 1           | --> NULL
+| Index 2           | --> HNode3 (hcode: 30) --> NULL
+| Index 3           | --> HNode4 (hcode: 40) --> HNode5 (hcode: 10) --> NULL
++-------------------+
+
+Key to Search: HNode (hcode: 10)
+
+Traversal Process:
+1. Calculate position: pos = key->hcode & htab->mask
+2. Set from = &htab->tab[pos]
+3. Start loop:
+   - cur = *from (points to HNode1)
+   - Check if cur->hcode == key->hcode (10 == 10) -> Match found!
+"
+
+'''
+Step 5: Table Deletion
+
+To delete a list node, the previous node is updated to point to the next node, except for the first node, there is no previous node! Most people will add a special case for deleting the first node:
+
+    Update the slot when deleting the first node.
+    Otherwise, update the previous node.
+
+But this is not necessary, consider that in both cases the update just sets a pointer to the next node, you don’t need to know if it is from the slot or a node, as long as you have the address (of the incoming pointer).
+
+// remove a node from the chain
+static HNode *h_detach(HTab *htab, HNode **from) {
+    HNode *node = *from;
+    *from = node->next;
+    htab->size--;
+    return node;
+}
+
+What you can learn from this: Special cases may not be special.
+
+    No special case for deleting list nodes.
+    No need for a separate function to search and delete.
+
+so use 2 hash-maps
+'''
+
+'''
+What is Load Factor?
+
+The load factor is a crucial metric in the context of hash tables, representing the ratio of the number of entries (or keys) in the hash table to the total number of available slots (or buckets). It is calculated using the formula:
+
+[ \text{Load Factor} = \frac{\text{Number of Entries}}{\text{Number of Buckets}} ]
+
+A higher load factor indicates that the hash table is becoming full, which can lead to increased collision rates and, consequently, degraded performance during insertions and lookups.
+Why is Load Factor Important?
+
+    Performance Optimization: Maintaining an optimal load factor ensures that the hash table operates efficiently. A load factor that is too high can lead to excessive collisions, while a load factor that is too low can waste memory.
+
+    Dynamic Resizing: The load factor is often used as a threshold to trigger resizing of the hash table. When the load factor exceeds a predefined limit (like k_max_load_factor in the provided code), the hash table can be resized to accommodate more entries without compromising performance.
+
+Diagrammatic Representation
+
+Below is a simple diagram illustrating the concept of load factor in a hash table:
+
++-------------------+
+|   Hash Table      |
++-------------------+
+|  Bucket 0        |  --> Entry A
+|  Bucket 1        |  --> Entry B
+|  Bucket 2        |  --> Entry C
+|  Bucket 3        |  --> (Empty)
+|  Bucket 4        |  --> (Empty)
++-------------------+
+
+In this example, if there are 3 entries and 5 buckets, the load factor would be:
+
+[ \text{Load Factor} = \frac{3}{5} = 0.6 ]
+Example of Load Factor in Action
+
+Consider the following scenario where we have a hash table initialized with 4 buckets:
+
+language-cpp
+
+HMap hmap;
+hm_insert(&hmap, new HNode()); // 1st entry
+hm_insert(&hmap, new HNode()); // 2nd entry
+hm_insert(&hmap, new HNode()); // 3rd entry
+hm_insert(&hmap, new HNode()); // 4th entry
+
+After inserting 4 entries, the load factor is:
+
+[ \text{Load Factor} = \frac{4}{4} = 1.0 ]
+
+If we insert one more entry:
+
+language-cpp
+
+hm_insert(&hmap, new HNode()); // 5th entry
+
+Now, the load factor becomes:
+
+[ \text{Load Factor} = \frac{5}{4} = 1.25 ]
+
+Since this exceeds the k_max_load_factor of 8, the hash table will trigger a resizing operation to accommodate more entries.
+Why Use Two Hash Tables?
+
+In the provided code, the use of two hash tables (ht1 and ht2) serves a specific purpose:
+
+    Progressive Resizing: When the load factor exceeds the threshold, the hash table needs to be resized. Instead of resizing the current table in place (which can be costly), the code swaps the older table (ht2) with the newer one (ht1). This allows for a seamless transition while maintaining performance.
+
+    Minimizing Data Loss: By using two tables, the system can continue to accept new entries in ht1 while gradually moving existing entries from ht2 to ht1. This ensures that the hash table remains operational during the resizing process.
+
+    Efficiency: This approach allows for a more efficient handling of collisions and ensures that the hash table can grow dynamically without significant performance degradation.
+'''
+
+'''
+why load_factor is "8" ? 
++-------------------+
+|   Hash Table      |
++-------------------+
+| Bucket 0          |  --> 3 elements
+| Bucket 1          |  --> 8 elements (max load factor reached)
+| Bucket 2          |  --> 2 elements
+| Bucket 3          |  --> 1 element
+| ...               |
++-------------------+
+
+SO NOW NEW-HASH-TABLE WITH DOUBLE THE NUMBER OF BUCKETS : 8 * 2 = 16 ELEMENTS FOR EACH BUCKET  
+'''
+
+DRY RUN OF THE CODE : 
+""
+Very Detailed Answer: Understanding Resizing Logic in Hash Maps
+Question Summary
+
+The question seeks to clarify the purpose of the constants k_resizing_work and nwork in the context of a hash map resizing function. Additionally, it inquires about the logic behind the conditional statement if (!*from) { hmap->resizing_pos++; continue; }, specifically what *from represents, and requests an explanation supported by a diagram and an example.
+Answer
+
+In the provided code snippet, we are dealing with a hash map resizing operation. Let's break down the components and logic involved in this process.
+Constants and Variables
+
+    k_resizing_work: This constant is set to 128, which indicates the maximum number of nodes that can be processed in a single resizing operation. It serves as a limit to prevent excessive work during a single call to the resizing function, ensuring that the operation remains efficient and responsive.
+
+    nwork: This variable is initialized to 0 and is used to track the number of nodes that have been processed during the current resizing operation. The loop will continue until either nwork reaches k_resizing_work or there are no more nodes left to process in ht2.
+
+The Resizing Logic
+
+The core of the resizing logic is encapsulated in the while loop:
+
+language-cpp
+
+while (nwork < k_resizing_work && hmap->ht2.size > 0) {
+    HNode **from = &hmap->ht2.tab[hmap->resizing_pos];
+    if (!*from) {
+        hmap->resizing_pos++;
+        continue;
+    }
+
+    h_insert(&hmap->ht1, h_detach(&hmap->ht2, from));
+    nwork++;
+}
+
+Breakdown of the Loop
+
+    HNode **from = &hmap->ht2.tab[hmap->resizing_pos];: This line retrieves a pointer to the current node in the ht2 table that is being processed. The resizing_pos variable indicates the index of the node to be examined.
+
+    if (!*from): This condition checks if the current node pointed to by from is nullptr (or null). In C++, dereferencing a null pointer results in a false value. If *from is null, it means there is no node at the current position, and thus, the resizing operation should skip to the next position.
+
+    hmap->resizing_pos++; continue;: If the current node is null, the resizing_pos is incremented to point to the next node, and the continue statement skips the rest of the loop iteration, effectively moving to the next node without performing any further actions.
+
+Diagram Explanation
+
+To visualize this, consider the following diagram:
+
+ht2.tab: [ Node1, nullptr, Node2, Node3, nullptr ]
+                ↑
+          resizing_pos
+
+In this example, resizing_pos points to the second element, which is nullptr. The condition if (!*from) evaluates to true, leading to the increment of resizing_pos to point to the next node (Node2).
+Example
+
+Let’s illustrate this with a practical example:
+
+Assume we have a hash map with the following nodes in ht2:
+
+    ht2.tab[0] = Node1
+    ht2.tab[1] = nullptr
+    ht2.tab[2] = Node2
+    ht2.tab[3] = Node3
+    ht2.size = 3
+
+When the resizing function is called, the loop will process as follows:
+
+    First Iteration:
+        resizing_pos = 0, *from = Node1 (not null)
+        h_insert is called to move Node1 to ht1.
+        nwork is incremented to 1.
+
+    Second Iteration:
+        resizing_pos = 1, *from = nullptr
+        The condition is true, so resizing_pos is incremented to 2, and the loop continues.
+
+    Third Iteration:
+        resizing_pos = 2, *from = Node2 (not null)
+        h_insert is called to move Node2 to ht1.
+        nwork is incremented to 2.
+
+    Fourth Iteration:
+        resizing_pos = 3, *from = Node3 (not null)
+        h_insert is called to move Node3 to ht1.
+        nwork is incremented to 3.
+
+    Fifth Iteration:
+        resizing_pos = 4, *from = nullptr
+        The condition is true, so resizing_pos is incremented to 5, and the loop continues.
+
+At this point, since ht2.size is now 0 (all nodes have been moved), the function will proceed to free the memory allocated for ht2.tab.
+Conclusion
+
+In summary, the resizing logic in the hash map is designed to efficiently transfer nodes from one table to another while handling null pointers gracefully. The use of k_resizing_work and nwork ensures that the operation remains manageable and does not overwhelm the system. Understanding these components is crucial for maintaining performance and stability in hash map implementations.
+""
+
+'''
+why 2 calls in a sinle line : no memory leaks : 
+Explanation of the Combined Call
+
+The line h_insert(&hmap->ht1, h_detach(&hmap->ht2, from)); performs two critical operations in a single statement:
+
+    Detaching a Node: The h_detach function is called first. It removes a node from ht2 and returns it. This operation is crucial because it allows the node to be safely removed from the source hash table (ht2) before it is inserted into the destination hash table (ht1).
+
+    Inserting the Node: The returned node from h_detach is immediately passed to h_insert, which places it into ht1. This ensures that the node is moved from ht2 to ht1 in a single, atomic operation, minimizing the risk of data inconsistency or memory leaks.
+
+Diagrammatic Representation
+
+Below is a simplified diagram illustrating the process:
+
+Before Operation:
+ht2: [Node1 -> Node2 -> Node3]
+ht1: []
+
+After Detach (h_detach):
+ht2: [Node2 -> Node3]
+Detached Node: Node1
+
+After Insert (h_insert):
+ht2: [Node2 -> Node3]
+ht1: [Node1]
+'''
+
+'''
+a brief explanation about the things : 
+Code Breakdown
+
+language-cpp
+
+HNode *hm_lookup(HMap *hmap, HNode *key, bool (*eq)(HNode *, HNode *)) {
+    hm_help_resizing(hmap); // check resizing 
+    HNode **from = h_lookup(&hmap->ht1, key, eq); // search a node 
+    from = from ? from : h_lookup(&hmap->ht2, key, eq);
+    return from ? *from : NULL;
+}
+
+    Function Signature:
+        HNode *hm_lookup(HMap *hmap, HNode *key, bool (*eq)(HNode *, HNode *)): This function takes three parameters:
+            HMap *hmap: A pointer to the hash map structure.
+            HNode *key: A pointer to the key node that we want to look up.
+            bool (*eq)(HNode *, HNode *): A pointer to a function that compares two HNode objects for equality.
+
+    Resizing Check:
+        hm_help_resizing(hmap);: This line calls a helper function to check if the hash map needs resizing. This is important for maintaining performance and ensuring that the hash map can accommodate more entries if necessary.
+
+    First Hash Table Lookup:
+        HNode **from = h_lookup(&hmap->ht1, key, eq);: This line attempts to find the key in the first hash table (ht1). The h_lookup function returns a pointer to the node if found, or NULL if not.
+
+    Second Hash Table Lookup:
+        from = from ? from : h_lookup(&hmap->ht2, key, eq);: If the key was not found in the first hash table (ht1), the code attempts to look it up in the second hash table (ht2). The use of the conditional operator (? :) allows for a concise way to assign the result of the second lookup only if the first lookup returned NULL.
+
+    Return Value:
+        return from ? *from : NULL;: Finally, the function returns the found node if it exists; otherwise, it returns NULL. The dereferencing of from (*from) is safe here because if from is NULL, the function will return NULL before dereferencing.
+
+Diagram Representation
+
+To visualize the operation of the hm_lookup function, consider the following diagram:
+
++------------------+
+|      HMap        |
+|                  |
+|  +------------+  |
+|  |   ht1     |  |  ---> First Hash Table
+|  +------------+  |
+|  |   ht2     |  |  ---> Second Hash Table
+|  +------------+  |
++------------------+
+        |
+        |  hm_lookup(hmap, key, eq)
+        |
+        v
++------------------+
+|   Check Resize   |
++------------------+
+        |
+        v
++------------------+
+|   Lookup in ht1  |
++------------------+
+        |
+        |  (Found)  ---> Return Node
+        |  (Not Found)
+        v
++------------------+
+|   Lookup in ht2  |
++------------------+
+        |
+        |  (Found)  ---> Return Node
+        |  (Not Found)
+        v
++------------------+
+|      Return      |
+|       NULL       |
++------------------+
+
+Complex Example
+
+Let's consider a more complex example to illustrate how hm_lookup operates in practice.
+
+Assume we have a hash map with the following structure:
+
+language-cpp
+
+struct HNode {
+    int key;
+    int value;
+};
+
+struct HMap {
+    HashTable ht1;
+    HashTable ht2;
+};
+
+Suppose we have the following entries in our hash tables:
+
+    ht1:
+        Key: 1, Value: 100
+        Key: 2, Value: 200
+
+    ht2:
+        Key: 3, Value: 300
+        Key: 4, Value: 400
+
+Now, if we call hm_lookup(hmap, &keyNode3, eqFunction), where keyNode3 corresponds to the key 3, the following steps occur:
+
+    The function checks if resizing is needed.
+    It looks for keyNode3 in ht1:
+        Not found (returns NULL).
+    It then looks for keyNode3 in ht2:
+        Found (returns the node with key 3 and value 300).
+    The function returns the found node.
+
+Conversely, if we call hm_lookup(hmap, &keyNode5, eqFunction) for a key that does not exist in either table, the function will return NULL after checking both hash tables.
+'''
+
+'''
+eq() ==> entry_eq()
+static bool entry_eq(HNode *lhs, HNode *rhs) {
+    struct Entry *le = container_of(lhs, struct Entry, node);
+    struct Entry *re = container_of(rhs, struct Entry, node);
+    return le->key == re->key;
+}
+
+    Functionality:
+        This function compares two hash nodes (lhs and rhs) to determine if they are equal based on their keys.
+        It uses the container_of macro to retrieve the Entry structure from the hash nodes and compares their keys.
+        It returns true if the keys are equal, otherwise false.
+
+
+
+2nd function : 
+// The data structure for the key space.
+static struct {
+    HMap db;
+} g_data;
+
+static uint32_t do_get(std::vector<std::string> &cmd, uint8_t *res, uint32_t *reslen) {
+    Entry key;
+    key.key.swap(cmd[1]);
+    key.node.hcode = str_hash((uint8_t *)key.key.data(), key.key.size());
+
+    HNode *node = hm_lookup(&g_data.db, &key.node, &entry_eq); // entry_eq is eq()
+    if (!node) {
+        return RES_NX;
+    }
+	
+    const std::string &val = container_of(node, Entry, node)->val;
+    assert(val.size() <= k_max_msg);
+    memcpy(res, val.data(), val.size());
+    *reslen = (uint32_t)val.size();
+    return RES_OK;
+}
+
+EXPLANATION - BREAKDOWN :
+CODE : 
+Entry key;
+key.key.swap(cmd[1]);
+key.node.hcode = str_hash((uint8_t *)key.key.data(), key.key.size());
+EXPLANATION :  
+"
+Example
+Breakdown of the Code
+
+    Entry Structure: The Entry structure is likely defined elsewhere in the code. It typically contains at least two members:
+        key: A string or similar type that represents the key for the hash map.
+        node: A structure that contains the hash code (hcode) and possibly other metadata.
+
+    Key Initialization:
+
+    language-cpp
+
+Entry key;
+
+Here, an instance of Entry named key is created. This instance will be used to store the key and its associated hash code.
+
+Swapping the Key:
+
+language-cpp
+
+key.key.swap(cmd[1]);
+
+The swap function is a member of the std::string class in C++. It exchanges the contents of key.key with cmd[1]. This operation is efficient because it does not involve copying the string data; instead, it merely swaps the internal pointers. After this line, key.key contains the value of cmd[1], and cmd[1] is left in an empty state.
+
+Hash Code Calculation:
+
+language-cpp
+
+key.node.hcode = str_hash((uint8_t *)key.key.data(), key.key.size());
+
+This line computes the hash code for the key. The str_hash function is presumably a custom hash function that takes a pointer to the data of key.key (cast to uint8_t*) and its size. The result is stored in key.node.hcode. This hash code is crucial for efficiently locating the corresponding value in the hash map.
+
+Let's consider a simple example to illustrate the operations:
+
+    Input Command: Suppose cmd is a vector of strings, and cmd[1] contains the string "exampleKey".
+
+    language-cpp
+
+std::vector<std::string> cmd = {"get", "exampleKey"};
+
+Key Initialization: When we create the Entry instance:
+
+language-cpp
+
+Entry key; // key.key is initially empty
+
+Swapping the Key: After executing key.key.swap(cmd[1]);, the state of key will be:
+
+    key.key now contains "exampleKey"
+    cmd[1] is now an empty string.
+
+Hash Code Calculation: Assuming str_hash computes a hash based on the string content, let's say it returns 123456 for "exampleKey". After executing:
+
+language-cpp
+
+key.node.hcode = str_hash((uint8_t *)key.key.data(), key.key.size());
+
+The state of key will be:
+
+    key.node.hcode is now 123456.
+
+"
+
+2ND PART OF THE 2ND FUNCTION : 
+Hash Map Lookup:
+
+language-cpp
+
+HNode *node = hm_lookup(&g_data.db, &key.node, &entry_eq);
+if (!node) {
+    return RES_NX;
+}
+
+    The hm_lookup function is called to find the node associated with the hashed key in the hash map.
+    If the node is not found (node is nullptr), the function returns RES_NX, indicating that the key does not exist.
+
+Value Retrieval:
+
+language-cpp
+
+const std::string &val = container_of(node, Entry, node)->val;
+assert(val.size() <= k_max_msg);
+memcpy(res, val.data(), val.size());
+*reslen = (uint32_t)val.size();
+return RES_OK;
+
+    If the node is found, the value associated with the key is retrieved using container_of, which casts the node pointer back to an Entry pointer.
+    An assertion checks that the size of the value does not exceed a predefined maximum (k_max_msg).
+    The value is copied into the res buffer, and its length is stored in reslen.
+    Finally, the function returns RES_OK, indicating a successful retrieval.
+
+Equality Function:
+
+language-cpp
+
+    static bool entry_eq(HNode *lhs, HNode *rhs) {
+        struct Entry *le = container_of(lhs, struct Entry, node);
+        struct Entry *re = container_of(rhs, struct Entry, node);
+        return le->key == re->key;
+    }
+
+        The entry_eq function compares two nodes to determine if they represent the same key. It uses container_of to cast the nodes back to Entry pointers and compares their keys.
+
+Diagram
+
+Below is a simplified diagram illustrating the flow of the do_get function:
+
++-------------------+
+|   Command Vector  |
+|   cmd[1] = "key"  |
++-------------------+
+          |
+          v
++-------------------+
+|   Create Entry    |
+|   key.key = "key" |
++-------------------+
+          |
+          v
++-------------------+
+|   Generate Hash   |
+|   key.node.hcode  |
++-------------------+
+          |
+          v
++-------------------+
+|   Lookup in HMap  |
+|   hm_lookup(...)  |
++-------------------+
+          |
+          v
++-------------------+
+|   Node Found?     |
+|   (node != nullptr)|
++-------------------+
+          |
+          v
++-------------------+
+|   Retrieve Value   |
+|   val = node->val  |
++-------------------+
+          |
+          v
++-------------------+
+|   Copy to res     |
+|   memcpy(res, val)|
++-------------------+
+          |
+          v
++-------------------+
+|   Set reslen      |
+|   *reslen = val.size() |
++-------------------+
+          |
+          v
++-------------------+
+|   Return RES_OK   |
++-------------------+
+
+Example
+
+Let's consider a simple example to illustrate how this function works:
+
+    Setup:
+        Assume we have a hash map with the following entries:
+            Key: "apple", Value: "A sweet red fruit"
+            Key: "banana", Value: "A long yellow fruit"
+
+    Command Input:
+        The command vector cmd is populated as follows:
+
+        language-cpp
+
+    std::vector<std::string> cmd = {"get", "apple"};
+
+Function Call:
+
+    When do_get(cmd, res, &reslen) is called, the function will:
+        Set key.key to "apple".
+        Generate a hash code for "apple".
+        Look up the hash map and find the corresponding node.
+        Retrieve the value "A sweet red fruit".
+        Copy this value into the res buffer and set reslen to the length of the value.
+
+Result:
+
+    After execution, res will contain "A sweet red fruit", and reslen will be set to the length of this string.
+
+
+Diagram
+
+Below is a simplified diagram illustrating the flow of the do_get function:
+
++-------------------+
+|   Command Vector  |
+|   (cmd)           |
+|   +-----------+   |
+|   | cmd[1]   |   |
+|   +-----------+   |
++---------+---------+
+          |
+          v
++-------------------+
+|   Create Entry    |
+|   key.key = cmd[1]|
++---------+---------+
+          |
+          v
++-------------------+
+|   Compute Hash    |
+|   key.node.hcode  |
++---------+---------+
+          |
+          v
++-------------------+
+|   Lookup in HMap  |
+|   hm_lookup       |
++---------+---------+
+          |
+          v
++-------------------+
+|   Node Found?     |
+|   (if not, return)|
++---------+---------+
+          |
+          v
++-------------------+
+|   Retrieve Value   |
+|   Copy to res      |
++-------------------+
+          |
+          v
++-------------------+
+|   Return RES_OK    |
++-------------------+
+
+Example
+
+Let's consider a simple example to illustrate how the do_get function works.
+
+    Setup: Assume we have a hash map with the following key-value pairs:
+        Key: "apple", Value: "A fruit"
+        Key: "banana", Value: "Another fruit"
+
+    Command Input: The command vector cmd is populated as follows:
+
+    language-cpp
+
+    std::vector<std::string> cmd = {"get", "apple"};
+
+    Function Call: We call do_get(cmd, res, &reslen).
+
+    Execution:
+        The key "apple" is extracted and hashed.
+        The function looks up the hash map and finds the corresponding node.
+        The value "A fruit" is retrieved and copied to the res buffer.
+
+    Output: The function returns RES_OK, and res now contains "A fruit" with reslen set to the length of the string.
+
+'''
+
+details.txt : 
+part 9 : 
+09. Data Serialization : 
+"
+For now, our server protocol response is an error code plus a string. What if we need to return more complicated data? For example, we could add the keys command, which returns a list of strings. We have already encoded the list-of-strings data in the request protocol. In this chapter, we will generalize the encoding to handle different types of data. This is often called “serialization”.
+"
+
+'''
+refer for append() in cpp 
+"https://www.geeksforgeeks.org/stdstringappend-in-c/"
+'''
+
+'''
+what exactly is in out vector ? 
+
+ex : 
+std::string out;
+std::string val = "Hello, World!";
+out_str(out, val);
+
+diagram : 
++-------------------+
+|      out          |
+|-------------------|
+| SER_STR           |  			// Type identifier
+| 0D 00 00 00       |  			// Length of "Hello, World!" in little-endian format is 4 bytes 
+| H e l l o ,  W o r l d ! |  	// Actual string content
++-------------------+
+'''
+
+" Serialization of data : s
++------------------+
+|   Serialization   |
++------------------+
+| SER_NIL   (0)   | ---> NULL
+| SER_ERR   (1)   | ---> Error Code + Message
+| SER_STR   (2)   | ---> String
+| SER_INT   (3)   | ---> int64
+| SER_ARR   (4)   | ---> Array of Values
+"
+
+"
++-------------------+
+|   Output String   | <--- out
++-------------------+
+| SER_ERR           |  (Step 1)
+| [Error Code]     |  (Step 2)
+| [Message Length]  |  (Step 4)
+| [Message Content] |  (Step 5)
++-------------------+
+"
+
+"
+why everything in out vector : 
+In the provided code, we are dealing with a series of static functions that serialize different types of data into a std::string object, which acts as a dynamic buffer. The functions are designed to append various data types, such as nil, strings, integers, errors, and arrays, into this string. This approach is commonly used in serialization to prepare data for transmission or storage in a compact format.
+
++------------------+
+|   Output String  |
++------------------+
+| SER_NIL          |  // from out_nil
++------------------+
+| SER_STR          |  // from out_str
+| 0x00000004       |  // length of "test"
+| t e s t          |  // string data
++------------------+
+| SER_INT          |  // from out_int
+| 0x000000000000000A|  // integer value (10)
++------------------+
+| SER_ERR          |  // from out_err
+| 0x00000001       |  // error code
+| 0x00000004       |  // length of "fail"
+| f a i l          |  // error message
++------------------+
+| SER_ARR          |  // from out_arr
+| 0x00000003       |  // number of elements
++------------------+
+
+As we can see, our serialization protocol starts with a byte of data type, followed by various types of payload data. Arrays come first with their size, then their possibly nested elements.
+
+The serialization scheme can be summarized as “type-length-value” (TLV): “Type” indicates the type of the value; “Length” is for variable length data such as strings or arrays; “Value” is the encoded at last.
+
+TLV is the basis of many real-world serialization protocols. It has many advantages:
+
+    It can be decoded without a schema, like JSON or XML, which enables some types of mddleware.
+    It can encode arbitrarily nested data.
+
+The Thrift RPC framework includes 2 serialization schemes, both derived from the TLV scheme. You can learn more by reading the specification and comparing it to the popular Protobuf scheme.
+
+"
+
+'''
+3. Diagram Representation
+
+Below is a simplified diagram representing the hash table and its operations:
+
++-------------------+
+|      HTab        |
++-------------------+
+| Index 0          | -> NULL
+| Index 1          | -> HNode (k, v) -> NULL
+| Index 2          | -> NULL
+| ...               |
+| Index n          | -> NULL
++-------------------+
+
+4. Complex Example
+
+Let’s consider a more complex scenario where we perform multiple operations:
+
+    Set multiple key-value pairs:
+        $ ./client set a 1
+        $ ./client set b 2
+        $ ./client set c 3
+
+    Get values:
+        $ ./client get a returns (str) 1
+        $ ./client get b returns (str) 2
+        $ ./client get c returns (str) 3
+
+    List keys:
+        $ ./client keys returns (arr) len=3 with keys a, b, c.
+
+    Delete a key:
+        $ ./client del b returns (int) 1.
+
+    List keys again:
+        $ ./client keys returns (arr) len=2 with keys a, c.
+
+'''
+
+" generating keys 
+Client Command: keys
+        |
+        v
+   do_keys(cmd, out)
+        |
+        v
+   out_arr(out, len)  <--- Initialize output array with the number of keys
+        |
+        v
+   h_scan(&g_data.db.ht1, &cb_scan, &out)  <--- Scan first hash table
+        |
+        v
+   h_scan(&g_data.db.ht2, &cb_scan, &out)  <--- Scan second hash table
+        |
+        v
+   Return keys in out
+   
+control flow for : 
+''
+Very Detailed Answer: Understanding the Use of "std::string &out = *(std::string *)arg;" in C++
+Question Summary
+
+In the provided C++ code snippet, the line std::string &out = *(std::string *)arg; is used within the callback function cb_scan. This line is crucial for typecasting a generic pointer to a specific type, allowing the function to manipulate a std::string object. This response will delve into the purpose of this line, its implications, and provide a complex example to illustrate its usage.
+Answer
+
+In C++, when dealing with callback functions, it is common to pass additional data through a void* pointer. This allows for flexibility, as the function can accept any type of data. However, to use this data effectively, it must be cast back to its original type. The line in question performs this casting and creates a reference to a std::string object.
+Breakdown of the Code
+
+    Understanding the Context: The function h_scan iterates over a hash table (HTab) and applies a callback function (f) to each node in the table. The arg parameter is a void* pointer that can point to any type of data, which in this case is expected to be a pointer to a std::string.
+
+    Casting the Pointer: The line std::string &out = *(std::string *)arg; does the following:
+        It casts the void* pointer arg to a std::string*.
+        It dereferences this pointer to obtain a std::string object.
+        It creates a reference out to this std::string, allowing the function to modify the original string directly.
+
+    Why Use a Reference?: Using a reference (&out) instead of a pointer (*out) has several advantages:
+        Simplicity: It avoids the need for dereferencing every time you want to use out.
+        Safety: It ensures that out cannot be null, as references must always refer to a valid object.
+
+Diagram Representation
+
+Below is a simple diagram to illustrate the relationship between the arg pointer and the std::string object:
+
++-------------------+
+|      HTab        |
+|                   |
+|  +-------------+  |
+|  |   HNode    |  |
+|  +-------------+  |
+|         |         |
+|         v         |
+|  +-------------+  |
+|  |   void*    |  |  <--- arg (void pointer)
+|  +-------------+  |
+|         |         |
+|         v         |
+|  +-------------+  |
+|  | std::string |  |  <--- Actual std::string object
+|  +-------------+  |
++-------------------+
+
+''   
+"
+
+"
+we need to change MakeFile cuz of hashtable.cpp with server.cpp should compile
+"
+
+" refer : 'https://www.geeksforgeeks.org/stdstringdata-in-c/'
+s.data() ==> The data() function writes the characters of the string into an array. It returns a pointer to the array, obtained from conversion of string to the array. Its Return type is not a valid C-string as no ‘\0’ character gets appended at the end of array.
+"
+
+"
+(curr == *from)!= NULL; ==> it will not push the string into tab , so the both the commands, does not work : 
+$ ./client set k v
+(nil)
+$ ./client get k
+(str) v
+"
+
+part 10 : AVL TREE implementation 
+"https://build-your-own.org/redis/10_avltree"
+
+''
+The subtree height is stored in the node, which is the most intuitive way to code an AVL tree. However, the exact height is unnecessary; some implementations store the height difference instead, which takes only 2 bits.
+If only 2 bits are needed, they can be packed into one of the pointers since x64 pointers don’t use all the bits. However, this optimization is useless to us because we also have an extra field cnt.
+''
+cnt stores the subtree size, it’s used for rank queries in the next chapter.
+
+'''
+IMPLEMENTATION OF AVL-TREE ROTATION : 
+      30
+     /  \
+   20    40
+          \
+           50
+SOLUTION :  
+      40
+     /  \
+   30    50
+  /
+20    
+
+CODE :        
+static AVLNode *rot_left(AVLNode *node) {
+    AVLNode *new_node = node->right;
+    if (new_node->left) {
+        new_node->left->parent = node;
+    }
+    node->right = new_node->left;   // rotation
+    new_node->left = node;          // rotation
+    new_node->parent = node->parent;
+    node->parent = new_node;
+    avl_update(node);
+    avl_update(new_node);
+    return new_node;
+}
+
+Let's perform a dry run of the rot_left function using the initial tree structure:
+
+    Initial State:
+        node = 30
+        new_node = 40 (right child of 30)
+
+    Step 1: Check if new_node has a left child. It does not, so we skip updating the parent of new_node->left.
+    Step 2: Update node->right to new_node->left, which is nullptr. Now, node->right points to nullptr.
+    Step 3: Set new_node->left to node. Now, new_node->left points to 30.
+    Step 4: Update new_node->parent to node->parent, which is nullptr (since 30 is the root).
+    Step 5: Update node->parent to new_node, so now 30's parent is 40.
+    Step 6: Call avl_update(node) and avl_update(new_node) to update heights and balance factors.
+    Final State: The function returns new_node, which is now the new root of the subtree.
+
+'''
+
+'''
+Key Components
+
+    1. avl_update(node): This function updates the height and balance factor of the current node.
+    2. avl_depth(node): This function calculates the depth of a given node, which is essential for determining if the tree is balanced.
+    3. avl_fix_left(node) and avl_fix_right(node): These functions perform the necessary rotations to fix the imbalance when the left or right subtree is too deep, respectively.
+
+
+ROTATIONS RULES  : WATCH GATE-SMASHERS OR JENNY'S LECTURES FOR REFERENCE 
+Step 3: Rules for Rotations
+
+Rule 1: A right rotation restores balance if the left subtree is deeper by 2, and the left left subtree is deeper than the left right subtree.
+
+Rule 2: A left rotation makes the left subtree deeper than the right subtree while keeping the rotated height if the right subtree is deeper by 1.
+'''
+
+'''
+Diagram of AVL Tree
+
+Consider the following AVL tree before the fix:
+
+        30
+       /  \
+      20   40
+     / 
+    10  
+
+In this tree, the left subtree of node 30 has a depth of 2, while the right subtree has a depth of 1. This results in an imbalance, as the left subtree is deeper by 1.
+
+Let's perform a dry run of the avl_fix function on the above tree, starting from the node with value 30.
+
+    Initial Call: avl_fix(30)
+        Update node 30.
+        Calculate depths: l = 2 (left subtree) and r = 1 (right subtree).
+        Since l == r + 2, we call avl_fix_left(30).
+
+    Left Fix: avl_fix_left(30)
+        This function will perform a right rotation around node 30.
+        The new root will be node 20, and the tree will look like this:
+
+        20
+       /  \
+      10   30
+              \
+              40
+
+    Return to Parent: After fixing, we return to the parent of node 30 (which is now node 20).
+        Update node 20.
+        Calculate depths: l = 1 (left subtree) and r = 2 (right subtree).
+        The tree is now balanced, so we exit the loop.
+
+'''
+
+'''
+Complex Example
+
+Consider the following AVL tree:
+
+        30
+       /  \
+      20   40
+     / \   / \
+    10 25 35 50
+
+Let's say we want to delete the node with the value 20.
+Diagram of the Process
+
+    Initial Tree:
+
+            30
+           /  \
+          20   40
+         / \   / \
+        10 25 35 50
+
+    Finding the Successor: The successor of 20 is 25 (the smallest node in the right subtree).
+
+    Deleting the Successor: The function will recursively call avl_del on 25, which has no left child, so it will be replaced by its right child (which is NULL).
+
+    Replacing Node: The value of 20 is replaced with 25, and the tree now looks like this:
+
+            30
+           /  \
+          25   40
+         /     / \
+        10    35 50
+
+Dry Run of Each Iteration
+
+    First Call: avl_del(20)
+        node->right is not NULL, so it finds the successor 25.
+        Calls avl_del(25).
+
+    Second Call: avl_del(25)
+        node->right is NULL, so it replaces 25 with NULL.
+        Returns NULL to the first call.
+
+    Back to First Call:
+        The value of 20 is replaced with 25.
+        Updates the parent pointers and returns the new root.
+
+'''
+
+
+''' add() : 
+Example and Diagram
+
+Let's consider an example where we insert the values 10, 20, and 5 into the AVL tree.
+
+    Inserting 10:
+        The tree is empty, so 10 becomes the root.
+        Diagram:
+
+            10
+
+    Inserting 20:
+        The function traverses to the right of 10 since 20 > 10.
+        20 is inserted as the right child of 10.
+        Diagram:
+
+            10
+              \
+               20
+
+    Inserting 5:
+        The function traverses to the left of 10 since 5 < 10.
+        5 is inserted as the left child of 10.
+        Diagram:
+
+            10
+           /  \
+          5    20
+
+Dry Run of Each Iteration
+
+Let's perform a dry run of the insertion of 10, 20, and 5.
+
+    Inserting 10:
+        c.root is NULL.
+        A new Data object is created for 10.
+        *from points to c.root, which is NULL.
+        The new node is attached as the root.
+
+    Inserting 20:
+        *from points to 10.
+        Since 20 > 10, from is updated to point to 10->right, which is NULL.
+        The new node for 20 is attached as the right child of 10.
+
+    Inserting 5:
+        *from points to 10.
+        Since 5 < 10, from is updated to point to 10->left, which is NULL.
+        The new node for 5 is attached as the left child of 10.
+
+'''
+
+'''
+what is a macro vs system-call -- kernel development : 
+Very Detailed Answer: Understanding the container_of() Macro in C++
+Question Summary
+
+The question seeks to clarify whether the container_of() macro in C++ functions as a system call that can directly interact with hardware. It also requests an example and a diagram to illustrate the concept.
+Answer
+
+To address the question, we first need to understand what macros are in C++ and how they differ from system calls. The container_of() macro is a common utility in C and C++ programming, particularly in systems programming and kernel development. It is not a system call, nor does it directly interact with hardware. Instead, it is a preprocessor directive that helps in manipulating pointers and structures.
+What is a Macro?
+
+A macro in C++ is defined using the #define preprocessor directive. It allows you to create a shorthand for a piece of code, which the preprocessor replaces before the actual compilation of the code. Macros can simplify code and improve readability, but they do not have the same capabilities as functions or system calls.
+What is a System Call?
+
+A system call is a mechanism that allows user-level applications to request services from the operating system's kernel. System calls provide an interface for programs to interact with hardware and perform operations like file management, process control, and communication.
+The container_of() Macro
+
+The container_of() macro is used to obtain a pointer to the containing structure of a given member pointer. This is particularly useful in data structures like linked lists, where you may have a pointer to a member of a structure and want to retrieve the pointer to the structure itself.
+
+Here’s a typical definition of the container_of() macro:
+
+language-cpp
+
+#define container_of(ptr, type, member) \
+    ((type *)((char *)(ptr) - offsetof(type, member)))
+
+Example of container_of()
+
+Let’s consider a simple example to illustrate how container_of() works:
+
+language-cpp
+
+#include <iostream>
+#include <cstddef> // for offsetof
+
+struct Node {
+    int data;
+    Node* next;
+};
+
+#define container_of(ptr, type, member) \
+    ((type *)((char *)(ptr) - offsetof(type, member)))
+
+int main() {
+    Node node;
+    node.data = 42;
+    node.next = nullptr;
+
+    // Pointer to the 'data' member of the Node structure
+    int* dataPtr = &node.data;
+
+    // Use container_of to get the pointer to the Node structure
+    Node* nodePtr = container_of(dataPtr, Node, data);
+
+    std::cout << "Node data: " << nodePtr->data << std::endl; // Output: Node data: 42
+    return 0;
+}
+
+Diagram Explanation
+
+To visualize the container_of() macro, consider the following diagram:
+
++-------------------+
+|       Node        |
+|-------------------|
+| data: 42          | <--- Pointer to this member
+| next: nullptr     |
++-------------------+
+
+In this diagram, data is a member of the Node structure. When we have a pointer to data, we can use the container_of() macro to retrieve the pointer to the entire Node structure.
+'''
+
+'
+Diagram of the AVL Tree Before and After Deletion
+
+Before Deletion:
+
+        30
+       /  \
+     20    40
+    /  \     \
+   10   25    50
+
+After Deletion (assuming 20 has one child, 25):
+
+        30
+       /  \
+     25    40
+    /       \
+   10       50
+
+'
+
+'''
+verify the avl-tree data-structure : 
+Why Verification is Necessary
+
+Verification of an AVL tree is crucial for several reasons:
+
+    Structural Integrity: Ensures that the tree adheres to the AVL properties, preventing scenarios where the tree becomes unbalanced.
+    Pointer Conflicts: In complex data structures, pointer conflicts can arise, leading to incorrect parent-child relationships. This can cause traversal errors and incorrect data retrieval.
+    Data Consistency: Verifying that the auxiliary data (like node counts and depths) is accurate is essential for maintaining the integrity of the AVL tree.
+
+Example and Diagram
+
+Consider the following AVL tree:
+
+        30
+       /  \
+     20    40
+    /  \     \
+   10   25    50
+
+In this tree:
+
+    The balance factors are maintained.
+    Each node's parent pointer is correctly assigned.
+
+Now, suppose we perform an insertion that causes a pointer conflict, such as directly manipulating pointers without updating the parent references. For instance, if we insert a new node with value 5 under 10 but forget to update the parent pointer of 10, the tree may look like this:
+
+        30
+       /  \
+     20    40
+    /  \     \
+   10   25    50
+  /
+ 5 (incorrect parent pointer)
+
+'''
+multiset in cpp : refer : "https://www.geeksforgeeks.org/multiset-in-cpp-stl/"
+What are the applications of multiset?
+An example of multiset is the collection of prime factors of 720 i.e., {2, 2, 2, 2, 3, 3, 5}. Multiset has various applications in logic, philosophy, linguistics, physics, mathematics and computer science.
+
+	Automatic Sorting: The multiset automatically sorts the elements as they are inserted. This is beneficial when extracting values from an AVL tree, which is inherently a balanced binary search tree. The sorted nature of the multiset ensures that the extracted values maintain their order, which can be crucial for further operations or comparisons.
+
+    Handling Duplicates: In scenarios where the AVL tree may contain duplicate values, a multiset allows for the storage of these duplicates without any additional handling. This is particularly useful in cases where the AVL tree is used to store data that may not be unique.
+
+    Efficient Insertions: The insertion operation in a multiset is logarithmic in complexity, which is efficient for the purpose of extracting values from a tree structure. This efficiency is important when dealing with potentially large datasets.
+
+    Ease of Comparison: The multiset provides a straightforward way to compare the extracted values against a reference set, as seen in the container_verify function. The equality operator (==) can be used directly to check if the extracted values match the expected values.
+
+        [30]
+       /    \
+     [20]   [40]
+     / \      \
+   [10] [25]  [50]
+
+Extracting values from this AVL tree would yield: 10, 20, 25, 30, 40, 50
+'''
+
+part 11: refer : "https://build-your-own.org/redis/11_sortedset"
+HOW TO IDENTIFY ELEMENS IN A SET ==> "However while elements inside sets are not ordered, every element in a sorted set is associated with a floating point value, called the score, (this is why the type is also similar to a hash, since every element is mapped to a value). "
+
+creating a multiset -zset.cpp and zset.h 
+
+'''
+ZSet
++------------------+
+| AVLNode *tree    |  --> Points to the root of the AVL tree
+| HMap hmap        |  --> Hash map for quick access by name
++------------------+
+
+ZNode
++------------------+
+| AVLNode tree     |  --> AVL tree node for sorted order
+| HNode hmap       |  --> Hash node for name indexing
+| double score     |  --> Score associated with the node
+| size_t len       |  --> Length of the name
+| char name[0]     |  --> Flexible array for the name
++------------------+
+
+const char *name = "Alice";
+size_t len = 5;
+double score = 10.0;
+
+ZNode *node = znode_new(name, len, score);
+
++------------------+
+| AVLNode tree     |
+| HNode hmap       |
+| double score     |  --> 10.0
+| size_t len       |  --> 5
+| char name[0]     |  --> "Alice"
++------------------+
+
+why "memcpy(&node->name[0], name, len)" ? 
+Dynamic Memory Allocation: The ZNode structure contains a flexible array member char name[0], which allows for the storage of variable-length names. When a new node is created, the exact length of the name is not known at compile time, hence the need for dynamic memory allocation.
+'''
+
+'''
+part 13 : "https://build-your-own.org/redis/13_heap"
+for timers : use dll : doubly-linked-list : 
+In this diagram, the prev and next pointers of the node point to itself, indicating that the list is empty.
++-------+
+|       |
+|  Node | <---- prev (points to itself)
+|       |
++-------+
+|       |
+|       | <---- next (points to itself)
+|       |
++-------+
+'''
+
+'''
+Before heap_up():
+
+        10
+       /  \
+     20    30
+    / \
+   40  50
+
+After inserting 5 and calling heap_up():
+        5
+       / \
+     10   30
+    / \
+   40  50
+  /
+ 20
+
+Dry Run Example
+
+Let's consider a simple example where we have an array of HeapItem structures representing a min-heap. The initial state of the heap is as follows:
+Index 	Value 	Reference
+0 	3 	0
+1 	5 	1
+2 	8 	2
+3 	10 	3
+4 	15 	4
+
+Assume we want to insert a new value 2 at index 4. The HeapItem at index 4 will be updated to 2, and we will call heap_up(a, 4).
+Initial State
+
+    pos = 4
+    t.val = 2
+    a[4].val = 2
+
+Iteration 1
+
+    Condition Check: pos > 0 (true) and a[heap_parent(4)].val > t.val (i.e., a[1].val (5) > 2 is true)
+    Action: Swap a[4] with a[1]
+
+Index 	Value 	Reference
+0 	3 	0
+1 	2 	4
+2 	8 	2
+3 	10 	3
+4 	5 	1
+
+    Update reference: *a[4].ref = 4 (the reference of the new parent)
+    Update pos: pos = heap_parent(4) = 1
+
+Iteration 2
+
+    Condition Check: pos > 0 (true) and a[heap_parent(1)].val > t.val (i.e., a[0].val (3) > 2 is true)
+    Action: Swap a[1] with a[0]
+
+Index 	Value 	Reference
+0 	2 	1
+1 	3 	4
+2 	8 	2
+3 	10 	3
+4 	5 	1
+
+    Update reference: *a[1].ref = 1
+    Update pos: pos = heap_parent(1) = 0
+
+Iteration 3
+
+    Condition Check: pos > 0 (false) - exit the loop.
+
+Final State
+
+After the loop, we place the original item t back into its new position:
+Index 	Value 	Reference
+0 	2 	0
+1 	3 	1
+2 	8 	2
+3 	10 	3
+4 	5 	4
+Conclusion
+
+The heap_up function effectively maintains the min-heap property by moving the newly inserted element up the tree until it is in the correct position. The dry run illustrates how the function swaps elements and updates references, ensuring that the heap structure remains valid after the insertion. This process is crucial for efficient heap operations, particularly in priority queues and similar data structures.
+
+'''
+
+
+'''
+To understand the heap_down function, we first need to clarify its purpose. This function is used to restore the heap property after the root of the heap has been removed or replaced. The heap property states that for any given node, its value must be less than or equal to the values of its children.
+Code Explanation
+
+The function takes three parameters:
+
+    HeapItem *a: An array of HeapItem structures representing the heap.
+    size_t pos: The position of the element to be "sifted down."
+    size_t len: The total number of elements in the heap.
+
+Dry Run Example
+
+Let's consider a simple example with the following heap represented as an array of HeapItem:
+
+language-cpp
+
+HeapItem heap[] = {
+    {10, nullptr}, // Index 0
+    {15, nullptr}, // Index 1
+    {30, nullptr}, // Index 2
+    {40, nullptr}, // Index 3
+    {50, nullptr}  // Index 4
+};
+
+In this example, we will perform a dry run of the heap_down function starting from the root (index 0) and assume that the ref pointers are not used for this example.
+Initial State
+
+    pos = 0
+    len = 5
+
+Iteration Breakdown
+
+    First Iteration:
+        t = a[0] (HeapItem with value 10)
+        Calculate left and right child indices:
+            l = heap_left(0) = 1
+            r = heap_right(0) = 2
+        Initialize min_pos = -1 and min_val = 10.
+        Compare with left child:
+            a[1].val (15) > min_val (10), so no update.
+        Compare with right child:
+            a[2].val (30) > min_val (10), so no update.
+        Since min_pos remains -1, we break the loop.
+
+    Diagram:
+
+    [10]
+    /    \
+
+[15] [30]
+
+
+2. **Final State**:
+- The heap remains unchanged as the root was already the smallest element.
+- The function ends without making any swaps.
+
+### Conclusion
+The `heap_down` function effectively checks if the current node is smaller than its children and swaps it with the smallest child if necessary. In this case, since the root was already the smallest, no changes were made.
+
+### Additional Example
+Let's consider a different scenario where we want to "sift down" the element at index 1 (value 15):
+
+```cpp
+HeapItem heap[] = {
+ {10, nullptr}, // Index 0
+ {15, nullptr}, // Index 1
+ {5, nullptr},  // Index 2
+ {40, nullptr}, // Index 3
+ {50, nullptr}  // Index 4
+};
+
+    First Iteration:
+        pos = 1, t = a[1] (HeapItem with value 15)
+        l = heap_left(1) = 3, r = heap_right(1) = 4
+        Initialize min_pos = -1, min_val = 15.
+        Compare with left child:
+            a[3].val (40) > min_val (15), no update.
+        Compare with right child:
+            a[4].val (50) > min_val (15), no update.
+        Since min_pos remains -1, we break the loop.
+
+    Diagram:
+
+        [10]
+        /    \
+      [15]  [5]
+      /  \
+    [40] [50]
+
+
+'''
+
+"
+The map and the multimap are both containers that manage key/value pairs as single components. The essential difference between the two is that in a map the keys must be unique, while a multimap permits duplicate keys.
+"
+
+part 14 :  man pthreads 
+"https://build-your-own.org/redis/14_thread"
+
+for thread-locks with mutex : refer : "https://pubs.opengroup.org/onlinepubs/007908799/xsh/pthread_mutex_lock.html"
+
+'''
+Callbacks: *f and *arg
+
+In the Work struct, we have two key members:
+
+language-cpp
+
+struct Work {
+    void (*f)(void *) = NULL; // Function pointer for the callback
+    void *arg = NULL;         // Argument to be passed to the callback
+};
+
+    void (*f)(void *): This is a function pointer that points to a function taking a void* argument and returning void. This allows for flexibility in specifying any function that matches this signature as a callback. Callbacks are essential in asynchronous programming, as they enable the execution of a function in response to an event or condition, such as the completion of a task.
+
+    void *arg: This is a pointer to any data type, which allows the user to pass additional information to the callback function. By using void*, we can pass any type of data, which can then be cast back to the appropriate type within the callback function.
+
+Thread Management: pthread_t, pthread_mutex_t, and pthread_cond_t
+
+In the ThreadPool struct, we see the following members:
+
+language-cpp
+
+struct ThreadPool {
+    std::vector<pthread_t> threads; // Vector to hold thread identifiers
+    std::deque<Work> queue;          // Queue to hold work items
+    pthread_mutex_t mu;              // Mutex for synchronizing access to the queue
+    pthread_cond_t not_empty;        // Condition variable to signal when the queue is not empty
+};
+
+    pthread_t: This is a data type used to represent a thread identifier. Each thread created in the thread pool will have a unique pthread_t identifier, which is essential for managing and controlling the threads.
+
+    pthread_mutex_t: This is a mutex (mutual exclusion) type used to protect shared resources from concurrent access. In our case, it ensures that only one thread can access the queue at a time, preventing data races and ensuring thread safety.
+
+    pthread_cond_t: This is a condition variable that allows threads to wait for certain conditions to be met. In this context, it is used to signal threads when there is work available in the queue. When a thread attempts to retrieve work from the queue and finds it empty, it can wait on this condition variable until another thread adds work and signals that the queue is no longer empty.
+
+Diagram
+
+Below is a simple diagram illustrating the relationship between the components of the thread pool:
+
++-------------------+
+|    Thread Pool    |
+|-------------------|
+| pthread_t threads | <--- Thread Identifiers
+| deque<Work> queue | <--- Work Queue
+| pthread_mutex_t mu| <--- Mutex for synchronization
+| pthread_cond_t not_empty | <--- Condition variable
++-------------------+
+         |
+         |
+         v
++-------------------+
+|       Work        |
+|-------------------|
+| void (*f)(void *) | <--- Callback function
+| void *arg         | <--- Argument for the callback
++-------------------+
+
+'''
+
+''
+PROMPT GIVEN TO AI FOR PROPER GENERATION FOR MAKE-FILE : 
+
+==> 
+build a proper Makefile for the below files to automate the tasks by checking header files : 
+server.cpp   : 
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <errno.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <netinet/ip.h>
+#include <assert.h> // for assert()
+#include <math.h> // for mathematical operations 
+#include <vector> // for mapping clients with its fd 
+#include <fcntl.h> // for fcntl()
+#include <poll.h> // for pollin and pollout 
+#include <time.h> // for signal-handling with timers wrt poll 
+#include <string> // for std::string 
+// #include <map> // std::map
+
+// proj
+#include "hashtable.h"
+#include "zset.h"
+#include "common.h"
+#include "list.h"
+#include "heap.h"
+#include "thread_pool.h"
+
+avl.cpp : 
+#include <stddef.h>
+#include <stdint.h>
+#include "avl.h"
+
+hashtable.cpp: 
+#include <assert.h> // for assert() 
+#include <stdlib.h> // size_t 
+#include "hashtable.h"
+
+heap.cpp: 
+#include <stddef.h> // size_t 
+#include <stdint.h>
+#include "heap.h"
+
+thread_pool.cpp: 
+#include <assert.h>
+#include "thread_pool.h"
+
+#include<stddef.h> // size_t 
+
+zset.cpp: 
+#include <assert.h>
+#include <string.h> // for memcmp() 
+#include <stdlib.h> // size_t 
+// proj
+#include "zset.h"
+#include "common.h"
+ 
+#include <stdint.h> // C standard library - int64_t , uint32_t
+
+current Makefile : 
+# Makefile for compiling both server and client applications
+
+# Compiler and flags
+CXX = g++
+CXXFLAGS = -w -Wall -Wextra -O2 -g
+
+# Targets
+all: server client
+
+server: server.cpp
+	$(CXX) $(CXXFLAGS) server.cpp hashtable.cpp -o server
+
+client: client.cpp
+	$(CXX) $(CXXFLAGS) client.cpp -o client
+
+# Clean up build files
+clean:
+	rm -f server client
+
+REMEMBER WE DO NOT HAVE CLIENT.CPP FILE EXISTING NOW 
+''
+
+==> RESPONSE 
+''' Makefile : 
+FINAL MAKEFILE FOR THE WHOLE-PROJECT : 
+
+# Makefile for compiling the server application
+
+# Compiler and flags
+CXX = g++
+CXXFLAGS = -w -Wall -Wextra -O2 -g
+
+# Source files
+SRCS = server.cpp avl.cpp hashtable.cpp heap.cpp thread_pool.cpp zset.cpp
+
+# Object files
+OBJS = $(SRCS:.cpp=.o)
+
+# Executable name
+TARGET = server
+
+# Default target
+all: $(TARGET)
+
+# Rule to link object files to create the executable
+$(TARGET): $(OBJS)
+	$(CXX) $(CXXFLAGS) -o $@ $^ -lpthread #, link the pthread-library
+
+# Rule to compile source files into object files
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+# Clean up build files
+clean:
+	rm -f $(OBJS) $(TARGET)
+
+# Phony targets
+.PHONY: all clean
+
+
+==> EXPLANATION : 
+Explanation of the Makefile Components
+
+    Compiler and Flags:
+        CXX = g++: This specifies the C++ compiler to use.
+        CXXFLAGS = -w -Wall -Wextra -O2 -g: These flags control the compiler's behavior:
+            -w: Suppresses all warnings.
+            -Wall: Enables all warning messages.
+            -Wextra: Enables additional warning messages.
+            -O2: Optimizes the code for better performance.
+            -g: Includes debugging information.
+
+    Source and Object Files:
+        SRCS: A list of all the source files in the project.
+        OBJS: This variable transforms the list of source files into a list of object files by replacing the .cpp extension with .o.
+
+    Target:
+        TARGET: The name of the final executable that will be generated.
+
+    Default Target:
+        all: $(TARGET): This is the default target that will be built when you run make. It depends on the executable target.
+
+    Linking Rule: #, link the pthread-library
+        $(TARGET): $(OBJS): This rule specifies how to create the executable from the object files. The $@ represents the target name (in this case, server), and $^ represents all the prerequisites (the object files) , ensuring that the linker knows to link against the pthread library when creating the executable.
+
+    Compilation Rule:
+        %.o: %.cpp: This pattern rule tells make how to compile .cpp files into .o files. The $< represents the first prerequisite (the source file), and -o $@ specifies the output file.
+
+    Clean Target:
+        clean: This target is used to remove all object files and the executable. It helps in cleaning up the build environment.
+
+    Phony Targets:
+        .PHONY: all clean: This declares that all and clean are not actual files, preventing conflicts with files of the same name.
+
+Conclusion
+
+This Makefile is structured to efficiently manage the compilation of the server application while ensuring that all dependencies are respected. By using object files and pattern rules, it allows for incremental builds, which is crucial for larger projects. The absence of client.cpp is acknowledged, and the Makefile is tailored to compile only the necessary components.
